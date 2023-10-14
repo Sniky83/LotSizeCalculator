@@ -57,9 +57,9 @@ namespace LotSizeCalculator.Utils
             Console.WriteLine($"\nVous pouvez utiliser un lot de [{computedLot:F2}] pour votre ordre\n");
             Console.ResetColor();
             Console.WriteLine($"1 Pip vaut [{eurConversionOnePip:F4}€]\n");
-            Console.WriteLine($"Pour {maxProfitPipsInputDouble} Pips de gagné sur votre trade :");
+            Console.WriteLine($"Pour {maxProfitPipsInputDouble} Pips de misé sur votre trade :");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"\t- Vous obtiendrez [{finalProfit:F1}€] de profit soit [{capitalPercentProfit:F1}%] de votre capital");
+            Console.WriteLine($"\t- Vous obtiendrez [{finalProfit:F1}€] de profit (TP) soit [{capitalPercentProfit:F1}%] de votre capital");
             Console.ResetColor();
 
             if (rr < 1)
@@ -77,7 +77,7 @@ namespace LotSizeCalculator.Utils
 
             Console.WriteLine($"\t- Vous avez un RR de [{rr:F2}]");
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"\nVous risquez cependant de perdre [{riskLoss}€] sur votre SL");
+            Console.WriteLine($"\t- Vous risquez cependant de perdre [{riskLoss}€] sur votre SL");
             Console.ResetColor();
 
             LeaveApp();
