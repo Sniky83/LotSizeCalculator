@@ -103,12 +103,7 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
         continue;
     }
 
-    double totalMoneyLoss = (percentLossInput / 100) * capitalInput;
-    double onePipValue = totalMoneyLoss / qtyPipsLossInput;
-    double computedLot = 0;
-
     double castCurrency = 0;
-    double eurConversionOnePip = 0;
 
     string jsonResult = "";
 
@@ -136,10 +131,14 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
         break;
     }
 
+    double totalMoneyLoss = (percentLossInput / 100) * capitalInput;
+    double onePipValue = totalMoneyLoss / qtyPipsLossInput;
+    double eurConversionOnePip = 0;
+    double computedLot = 0;
+    double finalOnePipValue = 0;
+
     if (isCashSymbol)
     {
-        computedLot = onePipValue / 1;
-
         if (foundSymbolCash.Value == "GBP" && ratesElement.TryGetProperty("GBP", out JsonElement gbpValue))
         {
             castCurrency = gbpValue.GetDouble();
@@ -169,11 +168,13 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
             ConsoleUtil.ErrorMsg($"Erreur : impossible de retrouver le symbole associé : {foundSymbolCash.Value}\nIl est donc impossible d'utiliser l'application. Veuillez contacter le créateur de celle-ci");
             break;
         }
+
+        eurConversionOnePip = (1 / castCurrency) * onePipValue;
+        computedLot = Math.Round(onePipValue / eurConversionOnePip, 2);
+        finalOnePipValue = computedLot * eurConversionOnePip;
     }
     else
     {
-        computedLot = onePipValue / foundSymbolOther.Value.Item1;
-
         if (foundSymbolOther.Value.Item2 == "GBP" && ratesElement.TryGetProperty("GBP", out JsonElement gbpValue))
         {
             castCurrency = gbpValue.GetDouble();
@@ -203,6 +204,11 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
             ConsoleUtil.ErrorMsg($"Erreur : impossible de retrouver le symbole associé : {foundSymbolOther.Value.Item2}\nIl est donc impossible d'utiliser l'application. Veuillez contacter le créateur de celle-ci");
             break;
         }
+
+        double oneCurExchFromEur = (1 / castCurrency);
+        eurConversionOnePip = oneCurExchFromEur * onePipValue;
+        computedLot = Math.Round(onePipValue / (foundSymbolOther.Value.Item1 * oneCurExchFromEur), 2);
+        finalOnePipValue = computedLot * (oneCurExchFromEur * foundSymbolOther.Value.Item1);
     }
 
     if (computedLot < 0.01)
@@ -211,11 +217,11 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
         continue;
     }
 
-    eurConversionOnePip = (1 / castCurrency) * onePipValue;
-
-    double finalProfit = eurConversionOnePip * qtyPipsProfitInput;
+    double finalProfit = finalOnePipValue * qtyPipsProfitInput;
     double capitalPercentProfit = (finalProfit / capitalInput) * 100;
     double computeRR = capitalPercentProfit / percentLossInput;
+    double computeStopLoss = finalOnePipValue * qtyPipsLossInput;
+    double computeStopLossPercent = (computeStopLoss / capitalInput) * 100;
 
-    ConsoleUtil.LogFinalMsg(computedLot, finalProfit, capitalPercentProfit, computeRR, totalMoneyLoss, qtyPipsProfitInput, eurConversionOnePip);
+    ConsoleUtil.LogFinalMsg(computedLot, finalProfit, capitalPercentProfit, computeRR, computeStopLoss, computeStopLossPercent, qtyPipsProfitInput, finalOnePipValue);
 }
