@@ -6,4 +6,4 @@ J'ai donc pensé à créer une application console en C# pour simplifier la vie 
 
 Vous retrouverez toutes les informations dans l'executable.
 
-![Démo de l'application console](demo.png)
+![Démo de l'application console](LotSizeCalculator/demo.png)
