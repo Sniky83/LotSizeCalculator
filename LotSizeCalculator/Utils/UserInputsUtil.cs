@@ -36,11 +36,11 @@ namespace LotSizeCalculator.Utils
             {
                 cashOrNotInput = cashOrNotInput.ToLower();
 
-                if (cashOrNotInput == "y" || cashOrNotInput == "yes" || cashOrNotInput == "o" || cashOrNotInput == "oui")
+                if (cashOrNotInput == "y" || cashOrNotInput == "yes" || cashOrNotInput == "o" || cashOrNotInput == "oui" || cashOrNotInput == "true")
                 {
                     return true;
                 }
-                else if(cashOrNotInput == "n" || cashOrNotInput == "no" || cashOrNotInput == "non")
+                else if(cashOrNotInput == "n" || cashOrNotInput == "no" || cashOrNotInput == "non" || cashOrNotInput == "false")
                 {
                     return false;
                 }

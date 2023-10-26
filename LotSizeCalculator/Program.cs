@@ -206,7 +206,6 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
         }
 
         double oneCurExchFromEur = (1 / castCurrency);
-        eurConversionOnePip = oneCurExchFromEur * onePipValue;
         computedLot = Math.Round(onePipValue / (foundSymbolOther.Value.Item1 * oneCurExchFromEur), 2);
         finalOnePipValue = computedLot * (oneCurExchFromEur * foundSymbolOther.Value.Item1);
     }
