@@ -77,7 +77,7 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
 
             if (foundSymbolCash.Key is null)
             {
-                ConsoleUtil.ErrorMsg("Erreur: le symbole recherché est introuvable");
+                ConsoleUtil.ErrorMsg("Erreur : le symbole recherché est introuvable");
                 continue;
             }
         }
@@ -87,7 +87,7 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
 
             if (foundSymbolOther.Key is null)
             {
-                ConsoleUtil.ErrorMsg("Erreur: le symbole recherché est introuvable");
+                ConsoleUtil.ErrorMsg("Erreur : le symbole recherché est introuvable");
                 continue;
             }
         }
