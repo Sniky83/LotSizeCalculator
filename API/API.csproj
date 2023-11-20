@@ -4,10 +4,15 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>icône.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\LotSizeCalculator\Services\CurrencyService.cs" Link="Services\CurrencyService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="icône.ico" />
   </ItemGroup>
 
   <ItemGroup>

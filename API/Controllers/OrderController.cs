@@ -18,16 +18,17 @@ namespace API.Controllers
         [HttpGet(Name = "GetInfo")]
         public IActionResult Get([FromQuery] OrderGetInfoDto orderGetInfoDto)
         {
-            OrderService orderService = new OrderService();
+            OrderService orderService = new();
 
             try
             {
                 OrderGetInfoResult result = orderService.GetInfo(orderGetInfoDto);
-
+                
                 return Ok(result);
             }
             catch(Exception ex)
-            { 
+            {
+                _logger.LogInformation("Erreur lors de la récupération des infos sur l'ordre {ex}", ex);
                 return BadRequest(new { error = ex.Message });
             }
         }

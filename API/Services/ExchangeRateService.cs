@@ -7,8 +7,8 @@ namespace API.Services
     {
         public static double GetExchangeData(bool isCash, KeyValuePair<string, (int, string)> foundSymbolOther, KeyValuePair<string, string> foundSymbolCash)
         {
-            double castCurrency = 0;
-            string jsonResult = "";
+            double castCurrency;
+            string jsonResult;
 
             JsonElement ratesElement;
 

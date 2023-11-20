@@ -9,7 +9,7 @@ namespace API.Repositories
 {
     public class OrderService
     {
-        private Dictionary<string, (int, string)> symbolsDicOther = new()
+        private readonly Dictionary<string, (int, string)> symbolsDicOther = new()
         {
             { "US500", (50, "USD") },
             { "US30", (5, "USD") },
@@ -29,7 +29,7 @@ namespace API.Repositories
             { "NAT.GAS", (10, "USD") }
         };
 
-        private Dictionary<string, string> symbolsDicCash = new()
+        private readonly Dictionary<string, string> symbolsDicCash = new()
         {
             { "US500", "USD" },
             { "US30", "USD" },
@@ -73,7 +73,7 @@ namespace API.Repositories
             return FillOrderGetInfoResult(orderGetInfoDto, lotAndOnePipValue);
         }
 
-        private OrderGetInfoResult FillOrderGetInfoResult(OrderGetInfoDto orderGetInfoDto, LotAndOnePipValue lotAndOnePipValue)
+        private static OrderGetInfoResult FillOrderGetInfoResult(OrderGetInfoDto orderGetInfoDto, LotAndOnePipValue lotAndOnePipValue)
         {
 
             double finalProfit = lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalTpPips;
@@ -98,8 +98,8 @@ namespace API.Repositories
         {
             double totalMoneyLoss = (orderGetInfoDto.MaxPercentCapital / 100) * orderGetInfoDto.Capital;
             double onePipValue = totalMoneyLoss / orderGetInfoDto.TheoricalSlPips;
-            double finalOnePipValue = 0;
-            double computedLot = 0;
+            double finalOnePipValue;
+            double computedLot;
 
             if (orderGetInfoDto.IsCash)
             {
