@@ -26,7 +26,9 @@ namespace API.Repositories
             { "XAUUSD", (1, "USD") },
             { "USOIL", (10, "USD") },
             { "UKOIL", (10, "USD") },
-            { "NAT.GAS", (10, "USD") }
+            { "NAT.GAS", (10, "USD") },
+            { "BTCEUR", (1, "EUR") },
+            { "BTCUSD", (1, "USD") }
         };
 
         private readonly Dictionary<string, string> symbolsDicCash = new()
