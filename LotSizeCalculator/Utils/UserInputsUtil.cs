@@ -17,7 +17,6 @@ namespace LotSizeCalculator.Utils
             if (!double.TryParse(genericInput, out double genericDouble))
             {
                 ConsoleUtil.ErrorMsg(errorMsg);
-                throw new Exception();
             }
 
             return genericDouble;

@@ -133,12 +133,21 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
 
     double totalMoneyLoss = (percentLossInput / 100) * capitalInput;
     double onePipValue = totalMoneyLoss / qtyPipsLossInput;
-    double eurConversionOnePip = 0;
     double computedLot = 0;
     double finalOnePipValue = 0;
+    double dividor = 0;
 
     if (isCashSymbol)
     {
+        if (foundSymbolCash.Key.Contains("WTI"))
+        {
+            dividor = 10;
+        }
+        else
+        {
+            dividor = 1;
+        }
+
         if (foundSymbolCash.Value == "GBP" && ratesElement.TryGetProperty("GBP", out JsonElement gbpValue))
         {
             castCurrency = gbpValue.GetDouble();
@@ -169,9 +178,14 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
             break;
         }
 
-        eurConversionOnePip = (1 / castCurrency) * onePipValue;
-        computedLot = Math.Round(onePipValue / eurConversionOnePip, 2);
-        finalOnePipValue = computedLot * eurConversionOnePip;
+        double eurConversionOnePip = (1 / castCurrency) * onePipValue;
+
+        double delta = onePipValue - eurConversionOnePip;
+
+        double lotWithoutRound = (onePipValue + delta) / dividor;
+        computedLot = Math.Round(lotWithoutRound, 2);
+        double margin = computedLot - lotWithoutRound;
+        finalOnePipValue = onePipValue - margin;
     }
     else
     {
@@ -205,9 +219,24 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
             break;
         }
 
+        if (foundSymbolOther.Key.Contains("XAU"))
+        {
+            dividor /= 10;
+        }
+        else if (foundSymbolOther.Key.Contains("XAG"))
+        {
+            dividor /= 100;
+        }
+        else
+        {
+            dividor = 1;
+        }
+
         double oneCurExchFromEur = (1 / castCurrency);
-        computedLot = Math.Round(onePipValue / (foundSymbolOther.Value.Item1 * oneCurExchFromEur), 2);
-        finalOnePipValue = computedLot * (oneCurExchFromEur * foundSymbolOther.Value.Item1);
+        double lotWithoutRound = (onePipValue / (foundSymbolOther.Value.Item1 * oneCurExchFromEur) / dividor);
+        computedLot = Math.Round(lotWithoutRound, 2);
+        double margin = computedLot - lotWithoutRound;
+        finalOnePipValue = computedLot * (oneCurExchFromEur * foundSymbolOther.Value.Item1) - margin;
     }
 
     if (computedLot < 0.01)

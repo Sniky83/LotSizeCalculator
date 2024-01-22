@@ -105,15 +105,54 @@ namespace API.Repositories
 
             if (orderGetInfoDto.IsCash)
             {
+                double dividor;
+
+                if (foundSymbolCash.Key.Contains("WTI"))
+                {
+                    dividor = 10;
+                }
+                else
+                {
+                    dividor = 1;
+                }
+
                 double eurConversionOnePip = (1 / castCurrency) * onePipValue;
-                computedLot = Math.Round(onePipValue / eurConversionOnePip, 2);
-                finalOnePipValue = computedLot * eurConversionOnePip;
+
+                double delta = onePipValue - eurConversionOnePip;
+
+                double lotWithoutRound = (onePipValue + delta) / dividor;
+
+                computedLot = Math.Round(lotWithoutRound, 2);
+
+                double margin = computedLot - lotWithoutRound;
+
+                finalOnePipValue = onePipValue - margin;
             }
             else
             {
+                double dividor = 0;
+
+                //On décalle la virgule de 1 pour me XAU sinon le lot est trop big
+                if (foundSymbolOther.Key.Contains("XAU"))
+                {
+                    dividor /= 10;
+                }
+                else if (foundSymbolOther.Key.Contains("XAG"))
+                {
+                    dividor /= 100;
+                }
+                else
+                {
+                    dividor = 1;
+                }
+
                 double oneCurExchFromEur = (1 / castCurrency);
-                computedLot = Math.Round(onePipValue / (foundSymbolOther.Value.Item1 * oneCurExchFromEur), 2);
-                finalOnePipValue = computedLot * (oneCurExchFromEur * foundSymbolOther.Value.Item1);
+                double lotWithoutRound = (onePipValue / (foundSymbolOther.Value.Item1 * oneCurExchFromEur)) / dividor;
+                computedLot = Math.Round(lotWithoutRound, 2);
+
+                double margin = computedLot - lotWithoutRound;
+
+                finalOnePipValue = (computedLot * (oneCurExchFromEur * foundSymbolOther.Value.Item1)) - margin;
             }
 
             if (computedLot < 0.01)

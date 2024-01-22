@@ -64,6 +64,8 @@ namespace LotSizeCalculator.Utils
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"\t- Vous obtiendrez [{finalProfit:F2}€] de profit (TP) soit [{capitalPercentProfit:F2}%] de votre capital");
             Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"\t- Vous risquez cependant de perdre [{riskLoss:F2}€] sur votre SL soit [{riskLossPercent:F2}%] de votre capital");
 
             if (rr < 1)
             {
@@ -79,8 +81,7 @@ namespace LotSizeCalculator.Utils
             }
 
             Console.WriteLine($"\t- Vous avez un RR de [{rr:F2}]");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"\t- Vous risquez cependant de perdre [{riskLoss:F2}€] sur votre SL soit [{riskLossPercent:F2}%] de votre capital");
+
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\t- Il a les swaps et les commissions à rajouter en plus du trade");
 
