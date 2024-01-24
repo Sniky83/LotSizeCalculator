@@ -1,4 +1,5 @@
 ﻿using LotSizeCalculator.Services;
+using System.Globalization;
 using System.Text.Json;
 
 namespace API.Services
@@ -8,18 +9,18 @@ namespace API.Services
         public static double GetExchangeData(bool isCash, KeyValuePair<string, (int, string)> foundSymbolOther, KeyValuePair<string, string> foundSymbolCash)
         {
             double castCurrency;
-            string jsonResult;
+
+            if (foundSymbolCash.Value == "EUR" || foundSymbolOther.Value.Item2 == "EUR")
+            {
+                return 1;
+            }
+
+            string jsonResult = CurrencyService.Exchange("EURUS").Result;
+            double.TryParse(jsonResult, NumberStyles.Any, CultureInfo.InvariantCulture, out castCurrency);
+
+            return castCurrency;
 
             JsonElement ratesElement;
-
-            try
-            {
-                jsonResult = CurrencyService.Exchange("EUR").Result;
-            }
-            catch
-            {
-                throw new Exception("Erreur : connexion interrompue avec l'API de conversion des devises. Il est donc impossible d'utiliser l'application. Veuillez contacter le créateur de celle-ci");
-            }
 
             try
             {

@@ -1,5 +1,6 @@
 ﻿using LotSizeCalculator.Services;
 using LotSizeCalculator.Utils;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
@@ -103,31 +104,19 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
         continue;
     }
 
-    double castCurrency = 0;
-
-    string jsonResult = "";
-
-    JsonElement ratesElement;
+    double castCurrency = 1;
 
     try
     {
-        jsonResult = CurrencyService.Exchange("EUR").Result;
+        if (foundSymbolCash.Value != "EUR" || foundSymbolOther.Value.Item2 != "EUR")
+        {
+            string jsonResult = CurrencyService.Exchange("EURUS").Result;
+            double.TryParse(jsonResult, NumberStyles.Any, CultureInfo.InvariantCulture, out castCurrency);
+        }
     }
-    catch
+    catch(Exception ex)
     {
-        ConsoleUtil.ErrorMsg("Erreur : connexion interrompue avec l'API de conversion des devises\nIl est donc impossible d'utiliser l'application. Veuillez contacter le créateur de celle-ci");
-        break;
-    }
-
-    try
-    {
-        JsonDocument jsonDoc = JsonDocument.Parse(jsonResult);
-        JsonElement root = jsonDoc.RootElement;
-        ratesElement = root.GetProperty("rates");
-    }
-    catch
-    {
-        ConsoleUtil.ErrorMsg("Erreur : les clés JSON de l'API ont changés\nIl est donc impossible d'utiliser l'application. Veuillez contacter le créateur de celle-ci");
+        ConsoleUtil.ErrorMsg(ex.Message);
         break;
     }
 
@@ -148,77 +137,16 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
             dividor = 1;
         }
 
-        if (foundSymbolCash.Value == "GBP" && ratesElement.TryGetProperty("GBP", out JsonElement gbpValue))
-        {
-            castCurrency = gbpValue.GetDouble();
-        }
-        else if (foundSymbolCash.Value == "USD" && ratesElement.TryGetProperty("USD", out JsonElement usdValue))
-        {
-            castCurrency = usdValue.GetDouble();
-        }
-        else if (foundSymbolCash.Value == "AUD" && ratesElement.TryGetProperty("AUD", out JsonElement audValue))
-        {
-            castCurrency = audValue.GetDouble();
-        }
-        else if (foundSymbolCash.Value == "CHF" && ratesElement.TryGetProperty("CHF", out JsonElement chfValue))
-        {
-            castCurrency = chfValue.GetDouble();
-        }
-        else if (foundSymbolCash.Value == "HKD" && ratesElement.TryGetProperty("HKD", out JsonElement hkdValue))
-        {
-            castCurrency = hkdValue.GetDouble();
-        }
-        else if (foundSymbolCash.Value == "EUR")
-        {
-            castCurrency = 1;
-        }
-        else
-        {
-            ConsoleUtil.ErrorMsg($"Erreur : impossible de retrouver le symbole associé : {foundSymbolCash.Value}\nIl est donc impossible d'utiliser l'application. Veuillez contacter le créateur de celle-ci");
-            break;
-        }
-
+        double conversionEur = (1 / castCurrency);
         double eurConversionOnePip = (1 / castCurrency) * onePipValue;
-
         double delta = onePipValue - eurConversionOnePip;
-
         double lotWithoutRound = (onePipValue + delta) / dividor;
-        computedLot = Math.Round(lotWithoutRound, 2);
-        double margin = computedLot - lotWithoutRound;
-        finalOnePipValue = onePipValue - margin;
+
+        computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+        finalOnePipValue = (computedLot * conversionEur);
     }
     else
     {
-        if (foundSymbolOther.Value.Item2 == "GBP" && ratesElement.TryGetProperty("GBP", out JsonElement gbpValue))
-        {
-            castCurrency = gbpValue.GetDouble();
-        }
-        else if (foundSymbolOther.Value.Item2 == "USD" && ratesElement.TryGetProperty("USD", out JsonElement usdValue))
-        {
-            castCurrency = usdValue.GetDouble();
-        }
-        else if (foundSymbolOther.Value.Item2 == "AUD" && ratesElement.TryGetProperty("AUD", out JsonElement audValue))
-        {
-            castCurrency = audValue.GetDouble();
-        }
-        else if (foundSymbolOther.Value.Item2 == "CHF" && ratesElement.TryGetProperty("CHF", out JsonElement chfValue))
-        {
-            castCurrency = chfValue.GetDouble();
-        }
-        else if (foundSymbolOther.Value.Item2 == "HKD" && ratesElement.TryGetProperty("HKD", out JsonElement hkdValue))
-        {
-            castCurrency = hkdValue.GetDouble();
-        }
-        else if (foundSymbolOther.Value.Item2 == "EUR")
-        {
-            castCurrency = 1;
-        }
-        else
-        {
-            ConsoleUtil.ErrorMsg($"Erreur : impossible de retrouver le symbole associé : {foundSymbolOther.Value.Item2}\nIl est donc impossible d'utiliser l'application. Veuillez contacter le créateur de celle-ci");
-            break;
-        }
-
         if (foundSymbolOther.Key.Contains("XAU"))
         {
             dividor /= 10;
@@ -232,11 +160,11 @@ while (ConsoleUtil.KeyPressed != (char)ConsoleKey.Escape)
             dividor = 1;
         }
 
-        double oneCurExchFromEur = (1 / castCurrency);
-        double lotWithoutRound = (onePipValue / (foundSymbolOther.Value.Item1 * oneCurExchFromEur) / dividor);
-        computedLot = Math.Round(lotWithoutRound, 2);
-        double margin = computedLot - lotWithoutRound;
-        finalOnePipValue = computedLot * (oneCurExchFromEur * foundSymbolOther.Value.Item1) - margin;
+        double eurConversionOnePip = (1 / castCurrency) * foundSymbolOther.Value.Item1;
+        double lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
+
+        computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+        finalOnePipValue = (computedLot * eurConversionOnePip);
     }
 
     if (computedLot < 0.01)

@@ -15,11 +15,11 @@ namespace API.Repositories
             { "US30", (5, "USD") },
             { "US100", (20, "USD") },
             { "JP225", (5, "USD") },
-            { "UK100", (10, "GBP") },
+            //{ "UK100", (10, "GBP") },
             { "FRA40", (10, "EUR") },
             { "GER40", (10, "EUR") },
             { "CHINA50", (1, "USD") },
-            { "AUS200", (1, "AUD") },
+            //{ "AUS200", (1, "AUD") },
             { "XAGEUR", (5, "EUR") },
             { "XAUEUR", (1, "EUR") },
             { "XAGUSD", (5, "USD") },
@@ -37,19 +37,19 @@ namespace API.Repositories
             { "US30", "USD" },
             { "US100", "USD" },
             { "JP225", "USD" },
-            { "UK100", "GBP" },
+            //{ "UK100", "GBP" },
             { "EUR50", "EUR" },
             { "FRA40", "EUR" },
             { "NETH25", "EUR" },
             { "SPAIN35", "EUR" },
-            { "SWISS20", "CHF" },
+            //{ "SWISS20", "CHF" },
             { "GER40", "EUR" },
             { "CHINA50", "USD" },
-            { "AUS200", "AUD" },
-            { "HK50", "HKD" },
+            //{ "AUS200", "AUD" },
+            //{ "HK50", "HKD" },
             { "PORT20", "EUR" },
             { "SWE30", "USD" },
-            { "UK250", "GBP" },
+            //{ "UK250", "GBP" },
             { "ITALY40", "EUR" },
             { "BRENT", "USD" },
             { "WTI", "USD" },
@@ -116,17 +116,13 @@ namespace API.Repositories
                     dividor = 1;
                 }
 
+                double conversionEur = (1 / castCurrency);
                 double eurConversionOnePip = (1 / castCurrency) * onePipValue;
-
                 double delta = onePipValue - eurConversionOnePip;
-
                 double lotWithoutRound = (onePipValue + delta) / dividor;
 
-                computedLot = Math.Round(lotWithoutRound, 2);
-
-                double margin = computedLot - lotWithoutRound;
-
-                finalOnePipValue = onePipValue - margin;
+                computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+                finalOnePipValue = (computedLot * conversionEur);
             }
             else
             {
@@ -146,13 +142,11 @@ namespace API.Repositories
                     dividor = 1;
                 }
 
-                double oneCurExchFromEur = (1 / castCurrency);
-                double lotWithoutRound = (onePipValue / (foundSymbolOther.Value.Item1 * oneCurExchFromEur)) / dividor;
-                computedLot = Math.Round(lotWithoutRound, 2);
+                double eurConversionOnePip = (1 / castCurrency) * foundSymbolOther.Value.Item1;
+                double lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
 
-                double margin = computedLot - lotWithoutRound;
-
-                finalOnePipValue = (computedLot * (oneCurExchFromEur * foundSymbolOther.Value.Item1)) - margin;
+                computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+                finalOnePipValue = (computedLot * eurConversionOnePip);
             }
 
             if (computedLot < 0.01)
