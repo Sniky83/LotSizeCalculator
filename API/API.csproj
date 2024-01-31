@@ -7,10 +7,6 @@
     <ApplicationIcon>icône.ico</ApplicationIcon>
   </PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-		<DebugType>none</DebugType>
-	</PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\LotSizeCalculator\Services\CurrencyService.cs" Link="Services\CurrencyService.cs" />
   </ItemGroup>

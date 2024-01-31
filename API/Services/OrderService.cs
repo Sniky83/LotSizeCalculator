@@ -77,7 +77,6 @@ namespace API.Repositories
 
         private static OrderGetInfoResult FillOrderGetInfoResult(OrderGetInfoDto orderGetInfoDto, LotAndOnePipValue lotAndOnePipValue)
         {
-
             double finalProfit = lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalTpPips;
             double capitalPercentProfit = (finalProfit / orderGetInfoDto.Capital) * 100;
             double computeRR = capitalPercentProfit / orderGetInfoDto.MaxPercentCapital;
@@ -126,21 +125,7 @@ namespace API.Repositories
             }
             else
             {
-                double dividor = 0;
-
-                //On décalle la virgule de 1 pour me XAU sinon le lot est trop big
-                if (foundSymbolOther.Key.Contains("XAU"))
-                {
-                    dividor /= 10;
-                }
-                else if (foundSymbolOther.Key.Contains("XAG"))
-                {
-                    dividor /= 100;
-                }
-                else
-                {
-                    dividor = 1;
-                }
+                int dividor = GetOnePipCoefficient(foundSymbolOther.Key);
 
                 double eurConversionOnePip = (1 / castCurrency) * foundSymbolOther.Value.Item1;
                 double lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
@@ -180,6 +165,26 @@ namespace API.Repositories
                 {
                     throw new Exception("Erreur : le symbole recherché est introuvable");
                 }
+            }
+        }
+
+        private static int GetOnePipCoefficient(string symbol)
+        {
+            if(symbol.Contains("XAU"))
+            {
+                return 10;
+            }
+            else if (symbol.Contains("WTI"))
+            {
+                return 100;
+            }
+            else if (symbol.Contains("XAG"))
+            {
+                return 1000;
+            }
+            else
+            {
+                return 1;
             }
         }
     }
