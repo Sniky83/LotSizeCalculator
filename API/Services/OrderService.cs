@@ -80,7 +80,7 @@ namespace API.Repositories
             double finalProfit = lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalTpPips;
             double capitalPercentProfit = (finalProfit / orderGetInfoDto.Capital) * 100;
             double computeRR = capitalPercentProfit / orderGetInfoDto.MaxPercentCapital;
-            double computeStopLoss = lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalSlPips;
+            double computeStopLoss = (lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalSlPips ) / - 1;
             double computeStopLossPercent = (computeStopLoss / orderGetInfoDto.Capital) * 100;
 
             return new OrderGetInfoResult()
@@ -100,43 +100,35 @@ namespace API.Repositories
             double totalMoneyLoss = (orderGetInfoDto.MaxPercentCapital / 100) * orderGetInfoDto.Capital;
             double onePipValue = totalMoneyLoss / orderGetInfoDto.TheoricalSlPips;
             double finalOnePipValue;
+            double lotWithoutRound;
             double computedLot;
 
             if (orderGetInfoDto.IsCash)
             {
-                double dividor;
-
-                if (foundSymbolCash.Key.Contains("WTI"))
-                {
-                    dividor = 10;
-                }
-                else
-                {
-                    dividor = 1;
-                }
+                double dividor = GetOnePipCoefficient(orderGetInfoDto.Symbol);
 
                 double conversionEur = (1 / castCurrency);
                 double eurConversionOnePip = (1 / castCurrency) * onePipValue;
                 double delta = onePipValue - eurConversionOnePip;
-                double lotWithoutRound = (onePipValue + delta) / dividor;
+                lotWithoutRound = (onePipValue + delta) / dividor;
 
                 computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
-                finalOnePipValue = (computedLot * conversionEur);
+                finalOnePipValue = (computedLot * conversionEur) * dividor;
             }
             else
             {
-                int dividor = GetOnePipCoefficient(foundSymbolOther.Key);
+                int dividor = GetOnePipCoefficient(orderGetInfoDto.Symbol);
 
                 double eurConversionOnePip = (1 / castCurrency) * foundSymbolOther.Value.Item1;
-                double lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
+                lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
 
                 computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
-                finalOnePipValue = (computedLot * eurConversionOnePip);
+                finalOnePipValue = (computedLot * eurConversionOnePip) * dividor;
             }
 
-            if (computedLot < 0.01)
+            if (lotWithoutRound < 0.01)
             {
-                throw new Exception($"Erreur : votre lot est inférieur à 0.01 ({computedLot:F3}). Veuillez augmenter votre capital ou alors diminuer le nombre de Pips pour votre SL ou encore augmenter votre pourcentage de pertes max de capital (peu recommandé)");
+                throw new Exception($"Erreur : votre lot est inférieur à 0.01 ({lotWithoutRound:F3}). Veuillez augmenter votre capital ou alors diminuer le nombre de Pips pour votre SL ou encore augmenter votre pourcentage de pertes max de capital (peu recommandé)");
             }
 
             return new LotAndOnePipValue()
@@ -176,7 +168,7 @@ namespace API.Repositories
             }
             else if (symbol.Contains("WTI"))
             {
-                return 100;
+                return 10;
             }
             else if (symbol.Contains("XAG"))
             {
