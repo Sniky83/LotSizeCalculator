@@ -82,6 +82,13 @@ namespace API.Repositories
             double computeRR = capitalPercentProfit / orderGetInfoDto.MaxPercentCapital;
             double computeStopLoss = (lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalSlPips ) / - 1;
             double computeStopLossPercent = (computeStopLoss / orderGetInfoDto.Capital) * 100;
+            //1% d'écart est toléré
+            double seuilTolerance = (orderGetInfoDto.MaxPercentCapital + 1) / -1;
+
+            if (computeStopLossPercent < seuilTolerance)
+            {
+                throw new Exception($"Le pourcentage total de perte pour le trade est non conforme vis à vis de la demande (1% d'écart toléré).\nDemandé : {orderGetInfoDto.MaxPercentCapital}%\n Actuel : {computeStopLossPercent}%");
+            }
 
             return new OrderGetInfoResult()
             {
@@ -108,7 +115,7 @@ namespace API.Repositories
                 double dividor = GetOnePipCoefficient(orderGetInfoDto.Symbol);
 
                 double conversionEur = (1 / castCurrency);
-                double eurConversionOnePip = (1 / castCurrency) * onePipValue;
+                double eurConversionOnePip = conversionEur * onePipValue;
                 double delta = onePipValue - eurConversionOnePip;
                 lotWithoutRound = (onePipValue + delta) / dividor;
 

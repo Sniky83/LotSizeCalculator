@@ -18,6 +18,11 @@ namespace API.Services
             string jsonResult = CurrencyService.Exchange("EURUS").Result;
             double.TryParse(jsonResult, NumberStyles.Any, CultureInfo.InvariantCulture, out castCurrency);
 
+            if(castCurrency > 1.6 || castCurrency < 0.4)
+            {
+                throw new Exception($"Le prix d'échange en EUR/DOL est anormal. Vérifier la récupération de l'échange.\n Valeur actuelle : {castCurrency}");
+            }
+
             return castCurrency;
 
             JsonElement ratesElement;
