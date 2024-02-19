@@ -20,7 +20,7 @@ namespace API.Services
 
             if(castCurrency > 1.6 || castCurrency < 0.4)
             {
-                throw new Exception($"Le prix d'échange en EUR/DOL est anormal. Vérifier la récupération de l'échange.\n Valeur actuelle : {castCurrency}");
+                throw new Exception($"Le prix d'échange en EUR/USD est anormal. Vérifier la récupération de l'échange.\n Valeur actuelle : {castCurrency}");
             }
 
             return castCurrency;
