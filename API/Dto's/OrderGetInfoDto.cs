@@ -8,5 +8,6 @@
         public double MaxPercentCapital { get; set; }
         public double TheoricalTpPips { get; set; }
         public double TheoricalSlPips { get; set; }
+        public double? LotSize { get; set; }
     }
 }

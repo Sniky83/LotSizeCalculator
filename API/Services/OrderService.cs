@@ -75,19 +75,21 @@ namespace API.Repositories
             return FillOrderGetInfoResult(orderGetInfoDto, lotAndOnePipValue);
         }
 
-        private static OrderGetInfoResult FillOrderGetInfoResult(OrderGetInfoDto orderGetInfoDto, LotAndOnePipValue lotAndOnePipValue)
+        private OrderGetInfoResult FillOrderGetInfoResult(OrderGetInfoDto orderGetInfoDto, LotAndOnePipValue lotAndOnePipValue)
         {
             double finalProfit = lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalTpPips;
             double capitalPercentProfit = (finalProfit / orderGetInfoDto.Capital) * 100;
             double computeRR = capitalPercentProfit / orderGetInfoDto.MaxPercentCapital;
-            double computeStopLoss = (lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalSlPips ) / - 1;
+            double computeStopLoss = (lotAndOnePipValue.OnePipValue * orderGetInfoDto.TheoricalSlPips);
             double computeStopLossPercent = (computeStopLoss / orderGetInfoDto.Capital) * 100;
             //1% d'écart est toléré
-            double seuilTolerance = (orderGetInfoDto.MaxPercentCapital + 1) / -1;
+            double seuilTolerance = (orderGetInfoDto.MaxPercentCapital + 1);
 
-            if (computeStopLossPercent < seuilTolerance)
+            if (computeStopLossPercent > seuilTolerance && orderGetInfoDto.LotSize is null)
             {
-                throw new Exception($"Le pourcentage total de perte pour le trade est non conforme vis à vis de la demande (1% d'écart toléré).\nDemandé : {orderGetInfoDto.MaxPercentCapital}%\n Actuel : {computeStopLossPercent}%");
+                //On boucle jusqu'a trouver le prochain capital accessible par rapport à notre limite
+                orderGetInfoDto.MaxPercentCapital -= 0.1;
+                return GetInfo(orderGetInfoDto);
             }
 
             return new OrderGetInfoResult()
@@ -105,35 +107,49 @@ namespace API.Repositories
         private LotAndOnePipValue CalculateLotAndOnePipValue(OrderGetInfoDto orderGetInfoDto, double castCurrency)
         {
             double totalMoneyLoss = (orderGetInfoDto.MaxPercentCapital / 100) * orderGetInfoDto.Capital;
-            double onePipValue = totalMoneyLoss / orderGetInfoDto.TheoricalSlPips;
+            double onePipValue = totalMoneyLoss / (orderGetInfoDto.TheoricalSlPips * -1);
             double finalOnePipValue;
             double lotWithoutRound;
             double computedLot;
 
+            int dividor = GetOnePipCoefficient(orderGetInfoDto.Symbol);
+            double conversionEur = (1 / castCurrency);
+
             if (orderGetInfoDto.IsCash)
             {
-                double dividor = GetOnePipCoefficient(orderGetInfoDto.Symbol);
-
-                double conversionEur = (1 / castCurrency);
                 double eurConversionOnePip = conversionEur * onePipValue;
                 double delta = onePipValue - eurConversionOnePip;
                 lotWithoutRound = (onePipValue + delta) / dividor;
 
-                computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+                if(orderGetInfoDto.LotSize is null)
+                {
+                    computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+                }
+                else
+                {
+                    computedLot = (double)orderGetInfoDto.LotSize;
+                }
+
                 finalOnePipValue = (computedLot * conversionEur) * dividor;
             }
             else
             {
-                int dividor = GetOnePipCoefficient(orderGetInfoDto.Symbol);
-
-                double eurConversionOnePip = (1 / castCurrency) * foundSymbolOther.Value.Item1;
+                double eurConversionOnePip = conversionEur * foundSymbolOther.Value.Item1;
                 lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
 
-                computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+                if (orderGetInfoDto.LotSize is null)
+                {
+                    computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+                }
+                else
+                {
+                    computedLot = (double)orderGetInfoDto.LotSize;
+                }
+
                 finalOnePipValue = (computedLot * eurConversionOnePip) * dividor;
             }
 
-            if (lotWithoutRound < 0.01)
+            if (lotWithoutRound < 0.01 && orderGetInfoDto.LotSize is null)
             {
                 throw new Exception($"Erreur : votre lot est inférieur à 0.01 ({lotWithoutRound:F3}). Veuillez augmenter votre capital ou alors diminuer le nombre de Pips pour votre SL ou encore augmenter votre pourcentage de pertes max de capital (peu recommandé)");
             }
