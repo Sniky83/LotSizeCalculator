@@ -107,7 +107,7 @@ namespace API.Repositories
         private LotAndOnePipValue CalculateLotAndOnePipValue(OrderGetInfoDto orderGetInfoDto, double castCurrency)
         {
             double totalMoneyLoss = (orderGetInfoDto.MaxPercentCapital / 100) * orderGetInfoDto.Capital;
-            double onePipValue = totalMoneyLoss / (orderGetInfoDto.TheoricalSlPips * -1);
+            double onePipValue = totalMoneyLoss / orderGetInfoDto.TheoricalSlPips;
             double finalOnePipValue;
             double lotWithoutRound;
             double computedLot;
