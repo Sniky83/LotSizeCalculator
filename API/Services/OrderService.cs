@@ -108,46 +108,42 @@ namespace API.Repositories
         {
             double totalMoneyLoss = (orderGetInfoDto.MaxPercentCapital / 100) * orderGetInfoDto.Capital;
             double onePipValue = totalMoneyLoss / (orderGetInfoDto.TheoricalSlPips * -1);
-            double finalOnePipValue;
             double lotWithoutRound;
             double computedLot;
+            double eurConversionOnePip;
 
             int dividor = GetOnePipCoefficient(orderGetInfoDto.Symbol);
             double conversionEur = (1 / castCurrency);
 
             if (orderGetInfoDto.IsCash)
             {
-                double eurConversionOnePip = conversionEur * onePipValue;
-                double delta = onePipValue - eurConversionOnePip;
-                lotWithoutRound = (onePipValue + delta) / dividor;
-
-                if(orderGetInfoDto.LotSize is null)
-                {
-                    computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
-                }
-                else
-                {
-                    computedLot = (double)orderGetInfoDto.LotSize;
-                }
-
-                finalOnePipValue = (computedLot * conversionEur) * dividor;
+                eurConversionOnePip = conversionEur * onePipValue;
             }
             else
             {
-                double eurConversionOnePip = conversionEur * foundSymbolOther.Value.Item1;
-                lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
-
-                if (orderGetInfoDto.LotSize is null)
-                {
-                    computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
-                }
-                else
-                {
-                    computedLot = (double)orderGetInfoDto.LotSize;
-                }
-
-                finalOnePipValue = (computedLot * eurConversionOnePip) * dividor;
+                eurConversionOnePip = conversionEur * foundSymbolOther.Value.Item1;
             }
+
+            if (orderGetInfoDto.IsCash)
+            {
+                lotWithoutRound = (onePipValue + (onePipValue - eurConversionOnePip)) / dividor;
+            }
+            else
+            {
+                lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
+            }
+
+            if (orderGetInfoDto.LotSize is null)
+            {
+                computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+            }
+            else
+            {
+                computedLot = (double)orderGetInfoDto.LotSize;
+            }
+
+            double finalOnePipValue = (computedLot * eurConversionOnePip) * dividor;
+
 
             if (lotWithoutRound < 0.01 && orderGetInfoDto.LotSize is null)
             {
