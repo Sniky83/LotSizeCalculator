@@ -111,6 +111,7 @@ namespace API.Repositories
             double lotWithoutRound;
             double computedLot;
             double eurConversionOnePip;
+            double finalOnePipValue;
 
             int dividor = GetOnePipCoefficient(orderGetInfoDto.Symbol);
             double conversionEur = (1 / castCurrency);
@@ -118,18 +119,12 @@ namespace API.Repositories
             if (orderGetInfoDto.IsCash)
             {
                 eurConversionOnePip = conversionEur * onePipValue;
+                double delta = onePipValue - eurConversionOnePip;
+                lotWithoutRound = (onePipValue + delta) / dividor;
             }
             else
             {
                 eurConversionOnePip = conversionEur * foundSymbolOther.Value.Item1;
-            }
-
-            if (orderGetInfoDto.IsCash)
-            {
-                lotWithoutRound = (onePipValue + (onePipValue - eurConversionOnePip)) / dividor;
-            }
-            else
-            {
                 lotWithoutRound = (onePipValue / eurConversionOnePip) / dividor;
             }
 
@@ -142,8 +137,14 @@ namespace API.Repositories
                 computedLot = (double)orderGetInfoDto.LotSize;
             }
 
-            double finalOnePipValue = (computedLot * eurConversionOnePip) * dividor;
-
+            if (orderGetInfoDto.IsCash)
+            {
+                finalOnePipValue = (computedLot * conversionEur) * dividor;
+            }
+            else
+            {
+                finalOnePipValue = (computedLot * eurConversionOnePip) * dividor;
+            }
 
             if (lotWithoutRound < 0.01 && orderGetInfoDto.LotSize is null)
             {
@@ -181,7 +182,7 @@ namespace API.Repositories
 
         private static int GetOnePipCoefficient(string symbol)
         {
-            if(symbol.Contains("XAU"))
+            if (symbol.Contains("XAU"))
             {
                 return 10;
             }
