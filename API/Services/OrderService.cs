@@ -130,7 +130,7 @@ namespace API.Repositories
 
             if (orderGetInfoDto.LotSize is null)
             {
-                computedLot = Math.Round(lotWithoutRound, 2, MidpointRounding.ToPositiveInfinity);
+                computedLot = Math.Round(lotWithoutRound, 2);
             }
             else
             {
